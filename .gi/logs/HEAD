@@ -1,0 +1,19 @@
+0000000000000000000000000000000000000000 0b12efb203fc75b7c8961a492162ae878e715a5d Aye Spiff <ayespiff@Ayes-MacBook-Pro.local> 1764863546 +0000	commit (initial): chore: scaffold Vite React TS app
+0b12efb203fc75b7c8961a492162ae878e715a5d 0000000000000000000000000000000000000000 Aye Spiff <ayespiff@Ayes-MacBook-Pro.local> 1764863608 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0b12efb203fc75b7c8961a492162ae878e715a5d Aye Spiff <ayespiff@Ayes-MacBook-Pro.local> 1764863608 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0000000000000000000000000000000000000000 Aye Spiff <ayespiff@Ayes-MacBook-Pro.local> 1764863641 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0b12efb203fc75b7c8961a492162ae878e715a5d Aye Spiff <ayespiff@Ayes-MacBook-Pro.local> 1764863641 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0000000000000000000000000000000000000000 Aye Spiff <ayespiff@Ayes-MacBook-Pro.local> 1764864034 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0b12efb203fc75b7c8961a492162ae878e715a5d Aye Spiff <ayespiff@Ayes-MacBook-Pro.local> 1764864034 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0000000000000000000000000000000000000000 Aye Spiff <ayespiff@Ayes-MacBook-Pro.local> 1764864042 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0b12efb203fc75b7c8961a492162ae878e715a5d Aye Spiff <ayespiff@Ayes-MacBook-Pro.local> 1764864042 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0000000000000000000000000000000000000000 Aye Spiff <ayespiff@Ayes-MBP.(none)> 1765141329 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0b12efb203fc75b7c8961a492162ae878e715a5d Aye Spiff <ayespiff@Ayes-MBP.(none)> 1765141329 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0000000000000000000000000000000000000000 Aye Spiff <ayespiff@Ayes-MBP.(none)> 1765141350 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d 0b12efb203fc75b7c8961a492162ae878e715a5d Aye Spiff <ayespiff@Ayes-MBP.(none)> 1765141350 +0000	Branch: renamed refs/heads/main to refs/heads/main
+0b12efb203fc75b7c8961a492162ae878e715a5d bf344d2e89c44d69cfa59791353ab9f13938c3df “Aye <“ayespiff04@gmail.com”> 1765141883 +0000	commit: feat: wire welcome page + routing
+bf344d2e89c44d69cfa59791353ab9f13938c3df b6d5c2b947e63802b3ac71cba334a11171e372c3 “Aye <“ayespiff04@gmail.com”> 1765142626 +0000	commit: chore: initial commit
+b6d5c2b947e63802b3ac71cba334a11171e372c3 a31a4808bc2182651111928555f63d48be623a15 “Aye <“ayespiff04@gmail.com”> 1765142904 +0000	pull --rebase origin main --allow-unrelated-histories (start): checkout a31a4808bc2182651111928555f63d48be623a15
+a31a4808bc2182651111928555f63d48be623a15 42c6b4a0871eadc12682a26cfd4245d28e807ee6 “Aye <“ayespiff04@gmail.com”> 1765143312 +0000	rebase (continue): feat: wire welcome page + routing
+42c6b4a0871eadc12682a26cfd4245d28e807ee6 829f151b4c5f211c02d72419920ff3ddcfcb881e “Aye <“ayespiff04@gmail.com”> 1765143824 +0000	rebase (pick): chore: initial commit
+829f151b4c5f211c02d72419920ff3ddcfcb881e 829f151b4c5f211c02d72419920ff3ddcfcb881e “Aye <“ayespiff04@gmail.com”> 1765143824 +0000	rebase (finish): returning to refs/heads/main
