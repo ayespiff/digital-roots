@@ -1,0 +1,28 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: digitalroots_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: digital_roots
+      MYSQL_USER: dr_user
+      MYSQL_PASSWORD: dr_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: digitalroots_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
