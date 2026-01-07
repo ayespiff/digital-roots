@@ -8,11 +8,22 @@ if ($lessonId <= 0) {
   exit;
 }
 
-$qStmt = $pdo->prepare("SELECT id, prompt FROM questions WHERE lesson_id = ? ORDER BY id ASC");
+$qStmt = $pdo->prepare("
+  SELECT id, prompt
+  FROM questions
+  WHERE lesson_id = ?
+  ORDER BY id ASC
+");
 $qStmt->execute([$lessonId]);
 $questions = $qStmt->fetchAll();
 
-$oStmt = $pdo->prepare("SELECT id, option_text FROM options WHERE question_id = ? ORDER BY id ASC");
+$oStmt = $pdo->prepare("
+  SELECT id, option_text, is_correct, feedback
+  FROM options
+  WHERE question_id = ?
+  ORDER BY id ASC
+");
+
 foreach ($questions as &$q) {
   $oStmt->execute([$q["id"]]);
   $q["options"] = $oStmt->fetchAll();
