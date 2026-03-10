@@ -1,10 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { learnApi } from "../services/learnAPI";
 import type { Course, Lesson, Question } from "../types/learn";
+import { Navigate } from "react-router-dom";
+
+
+type User = { id: number; name: string } | null;
+type LearnPageProps = { user: User };
 
 type Stage = "courses" | "lessons" | "player" | "complete";
 
-export default function LearnPage() {
+export default function LearnPage({ user }: LearnPageProps) {
+
+  const [savingAttempt, setSavingAttempt] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   const [stage, setStage] = useState<Stage>("courses");
 
   const [courses, setCourses] = useState<Course[]>([]);
@@ -13,6 +22,14 @@ export default function LearnPage() {
 
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+
+  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [loadingLessons, setLoadingLessons] = useState(false);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+
+  const [courseError, setCourseError] = useState<string | null>(null);
+  const [lessonError, setLessonError] = useState<string | null>(null);
+  const [questionError, setQuestionError] = useState<string | null>(null);
 
   // player state
   const [index, setIndex] = useState(0);
@@ -40,12 +57,22 @@ export default function LearnPage() {
 
   // Load courses on page load
   useEffect(() => {
+    setLoadingCourses(true);
+    setCourseError(null);
+
     learnApi
       .getCourses()
-      .then(setCourses)
-      .catch(() => setCourses([]));
+      .then((data) => {
+        setCourses(data);
+      })
+      .catch(() => {
+        setCourses([]);
+        setCourseError("Could not load courses. Please refresh and try again.");
+      })
+      .finally(() => setLoadingCourses(false));
   }, []);
 
+  if (!user) return <Navigate to="/register" replace />;
   const resetPlayerState = () => {
     setIndex(0);
     setSelectedOptionId(null);
@@ -59,9 +86,20 @@ export default function LearnPage() {
     setSelectedLesson(null);
     resetPlayerState();
     setStage("lessons");
+    setLessonError(null);
+    setLoadingLessons(true);
 
-    const data = await learnApi.getLessons(course.id);
-    setLessons(data);
+    setLoadingLessons(true);
+    setLessonError(null);
+    try {
+      const data = await learnApi.getLessons(course.id);
+      setLessons(data);
+    } catch {
+      setLessons([]);
+      setLessonError("Could not load lessons for this course. Please try again.");
+    } finally {
+      setLoadingLessons(false);
+    }
   };
 
   const startLesson = async (lesson: Lesson) => {
@@ -69,8 +107,18 @@ export default function LearnPage() {
     resetPlayerState();
     setStage("player");
 
-    const data = await learnApi.getLessonQuestions(lesson.id);
-    setQuestions(data);
+    setLoadingQuestions(true);
+    setQuestionError(null);
+
+    try {
+      const data = await learnApi.getLessonQuestions(lesson.id);
+      setQuestions(data);
+    } catch {
+      setQuestions([]);
+      setQuestionError("Could not load questions for this lesson. Please try again.");
+    } finally {
+      setLoadingQuestions(false);
+    }
   };
 
   const onCheck = () => {
@@ -79,12 +127,33 @@ export default function LearnPage() {
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: selectedOptionId }));
   };
 
-  const onNext = () => {
+  //save, then complete
+  const onNext = async () => {
     if (!checked) return;
+
+    // last question -> save attempt -> complete
     if (index >= questions.length - 1) {
+      setSaveError(null);
+
+      if (selectedLesson && questions.length > 0) {
+        try {
+          setSavingAttempt(true);
+          await learnApi.saveAttempt({
+            lesson_id: selectedLesson.id,
+            score: score.correct,
+            total: score.total,
+          });
+        } catch {
+          setSaveError("Could not save progress. Please try again.");
+        } finally {
+          setSavingAttempt(false);
+        }
+      }
+
       setStage("complete");
       return;
     }
+
     setIndex((i) => i + 1);
     setSelectedOptionId(null);
     setChecked(false);
@@ -158,24 +227,37 @@ export default function LearnPage() {
         </p>
 
         <div style={{ display: "grid", gap: 12 }}>
-          {courses.map((c) => (
-            <Card key={c.id}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: 18 }}>{c.title}</div>
-                  <div style={{ opacity: 0.75, marginTop: 6 }}>{c.description ?? ""}</div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <Button onClick={() => openCourse(c)}>View lessons</Button>
-                </div>
-              </div>
-            </Card>
-          ))}
-
-          {courses.length === 0 && (
+          {loadingCourses ? (
             <Card>
-              <div>No courses found. Add dummy courses in MySQL to populate this screen.</div>
+              <div>Loading courses…</div>
             </Card>
+          ) : (
+            <>
+              {courseError && (
+                <Card>
+                  <div style={{ color: "red" }}>{courseError}</div>
+                </Card>
+              )}
+              {courses.map((c) => (
+                <Card key={c.id}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: 18 }}>{c.title}</div>
+                      <div style={{ opacity: 0.75, marginTop: 6 }}>{c.description ?? ""}</div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <Button onClick={() => openCourse(c)}>View lessons</Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+
+              {courses.length === 0 && (
+                <Card>
+                  <div>No courses available yet. Please check back soon.</div>
+                </Card>
+              )}
+            </>
           )}
         </div>
       </Container>
@@ -206,6 +288,11 @@ export default function LearnPage() {
         </div>
 
         <div style={{ display: "grid", gap: 12 }}>
+          {lessonError && (
+            <Card>
+              <div style={{ color: "red" }}>{lessonError}</div>
+            </Card>
+          )}
           {lessons.map((l) => (
             <Card key={l.id}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
@@ -239,6 +326,12 @@ export default function LearnPage() {
             You can retry this lesson or go back to the lesson list.
           </div>
 
+          {saveError && (
+            <div style={{ marginTop: 10, color: "red", fontSize: 14 }}>
+              {saveError}
+            </div>
+          )}
+
           <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
             <Button
               onClick={() => {
@@ -257,9 +350,28 @@ export default function LearnPage() {
     );
   }
 
-  // --- STAGE: player
+  // --- STAGE: question
   const chosen = currentQuestion?.options.find(o => o.id === selectedOptionId);
   const correct = currentQuestion?.options.find(o => o.is_correct === 1);
+
+  if (currentQuestion && (!currentQuestion.options || currentQuestion.options.length === 0)) {
+    return (
+      <Container>
+        <Card>
+          <div style={{ fontWeight: 800 }}>This question has no answer options.</div>
+          <div style={{ opacity: 0.75, marginTop: 6 }}>
+            This is a data issue. Please go back and try another lesson.
+          </div>
+
+          <div style={{ marginTop: 12 }}>
+            <Button variant="ghost" onClick={() => setStage("lessons")}>
+              ← Back to lessons
+            </Button>
+          </div>
+        </Card>
+      </Container>
+    );
+  }
   return (
     <Container>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
@@ -281,8 +393,14 @@ export default function LearnPage() {
         </div>
         <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6 }}>{progressPct}%</div>
       </div>
-
+      {/* question stage <render, only shows when loading*/}
+      {!loadingQuestions && questionError && (
+        <Card>
+          <div style={{ color: "red" }}>{questionError}</div>
+        </Card>
+      )}
       {!currentQuestion ? (
+
         <Card>Loading questions…</Card>
       ) : (
         <Card>
@@ -329,7 +447,8 @@ export default function LearnPage() {
                 marginTop: 14,
                 padding: 12,
                 borderRadius: 12,
-                background: "#f9fafb",
+                background: "#f8fafc",
+                borderLeft: chosen?.is_correct === 1 ? "4px solid #22c55e" : "4px solid #ef4444",
                 border: "1px solid #e5e7eb",
               }}
             >
@@ -359,7 +478,7 @@ export default function LearnPage() {
               Check answer
             </Button>
 
-            <Button disabled={!checked} onClick={onNext}>
+            <Button disabled={!checked || savingAttempt} onClick={onNext}>
               {index === questions.length - 1 ? "Finish" : "Next"}
             </Button>
           </div>
@@ -368,58 +487,3 @@ export default function LearnPage() {
     </Container>
   );
 }
-// import { useEffect, useState } from "react";
-
-// type Option = { id: number; option_text: string };
-// type Question = { id: number; prompt: string; options: Option[] };
-
-// export default function LearnPage() {
-//   const [questions, setQuestions] = useState<Question[]>([]);
-//   const [index, setIndex] = useState(0);
-
-//   useEffect(() => {
-//     fetch("http://localhost:8000/lesson_questions.php?lessonId=1")
-//       .then((r) => r.json())
-//       .then((data) => setQuestions(data))
-//       .catch(() => setQuestions([]));
-//   }, []);
-
-//   const q = questions[index];
-
-//   if (!q) return <div style={{ padding: 16 }}>Loading…</div>;
-
-//   return (
-//     <div style={{ padding: 16, maxWidth: 700 }}>
-//       <h1>Digital Roots — Learn</h1>
-
-//       <div style={{ marginTop: 12, padding: 16, border: "1px solid #ddd", borderRadius: 10 }}>
-//         <div style={{ opacity: 0.7, marginBottom: 8 }}>
-//           Question {index + 1} / {questions.length}
-//         </div>
-
-//         <h2 style={{ marginTop: 0 }}>{q.prompt}</h2>
-
-//         <div style={{ display: "grid", gap: 8 }}>
-//           {q.options.map((opt) => (
-//             <button
-//               key={opt.id}
-//               style={{ padding: 12, borderRadius: 8, border: "1px solid #ccc", textAlign: "left" }}
-//               onClick={() => {/* later: store answer */}}
-//             >
-//               {opt.option_text}
-//             </button>
-//           ))}
-//         </div>
-//       </div>
-
-//       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-//         <button disabled={index === 0} onClick={() => setIndex((i) => i - 1)}>
-//           Previous
-//         </button>
-//         <button disabled={index === questions.length - 1} onClick={() => setIndex((i) => i + 1)}>
-//           Next
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
